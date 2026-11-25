@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "r": 1,
+      "total_chambers": 2,
+      "outgoing_targets": 1
+    },
+    {
+      "r": 2,
+      "total_chambers": 4,
+      "outgoing_targets": 3
+    },
+    {
+      "r": 3,
+      "total_chambers": 8,
+      "outgoing_targets": 7
+    },
+    {
+      "r": 4,
+      "total_chambers": 16,
+      "outgoing_targets": 15
+    },
+    {
+      "r": 5,
+      "total_chambers": 32,
+      "outgoing_targets": 31
+    },
+    {
+      "r": 6,
+      "total_chambers": 64,
+      "outgoing_targets": 63
+    },
+    {
+      "r": 7,
+      "total_chambers": 128,
+      "outgoing_targets": 127
+    },
+    {
+      "r": 8,
+      "total_chambers": 256,
+      "outgoing_targets": 255
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "rows": [
+    {
+      "n": 0,
+      "p_y_exact": "-1",
+      "p_y_dec": -1.0,
+      "sup_gap_dec": 1.0,
+      "origin_intercept_exact": "-1",
+      "origin_intercept_dec": -1.0
+    },
+    {
+      "n": 1,
+      "p_y_exact": "-1/2",
+      "p_y_dec": -0.5,
+      "sup_gap_dec": 0.5,
+      "origin_intercept_exact": "-3/4",
+      "origin_intercept_dec": -0.75
+    },
+    {
+      "n": 2,
+      "p_y_exact": "-1/4",
+      "p_y_dec": -0.25,
+      "sup_gap_dec": 0.25,
+      "origin_intercept_exact": "-1/2",
+      "origin_intercept_dec": -0.5
+    },
+    {
+      "n": 3,
+      "p_y_exact": "-1/8",
+      "p_y_dec": -0.125,
+      "sup_gap_dec": 0.125,
+      "origin_intercept_exact": "-5/16",
+      "origin_intercept_dec": -0.3125
+    },
+    {
+      "n": 4,
+      "p_y_exact": "-1/16",
+      "p_y_dec": -0.0625,
+      "sup_gap_dec": 0.0625,
+      "origin_intercept_exact": "-3/16",
+      "origin_intercept_dec": -0.1875
+    },
+    {
+      "n": 5,
+      "p_y_exact": "-1/32",
+      "p_y_dec": -0.03125,
+      "sup_gap_dec": 0.03125,
+      "origin_intercept_exact": "-7/64",
+      "origin_intercept_dec": -0.109375
+    },
+    {
+      "n": 6,
+      "p_y_exact": "-1/64",
+      "p_y_dec": -0.015625,
+      "sup_gap_dec": 0.015625,
+      "origin_intercept_exact": "-1/16",
+      "origin_intercept_dec": -0.0625
+    },
+    {
+      "n": 7,
+      "p_y_exact": "-1/128",
+      "p_y_dec": -0.0078125,
+      "sup_gap_dec": 0.0078125,
+      "origin_intercept_exact": "-9/256",
+      "origin_intercept_dec": -0.03515625
+    },
+    {
+      "n": 8,
+      "p_y_exact": "-1/256",
+      "p_y_dec": -0.00390625,
+      "sup_gap_dec": 0.00390625,
+      "origin_intercept_exact": "-5/256",
+      "origin_intercept_dec": -0.01953125
+    },
+    {
+      "n": 9,
+      "p_y_exact": "-1/512",
+      "p_y_dec": -0.001953125,
+      "sup_gap_dec": 0.001953125,
+      "origin_intercept_exact": "-11/1024",
+      "origin_intercept_dec": -0.0107421875
+    },
+    {
+      "n": 10,
+      "p_y_exact": "-1/1024",
+      "p_y_dec": -0.0009765625,
+      "sup_gap_dec": 0.0009765625,
+      "origin_intercept_exact": "-3/512",
+      "origin_intercept_dec": -0.005859375
+    },
+    {
+      "n": 11,
+      "p_y_exact": "-1/2048",
+      "p_y_dec": -0.00048828125,
+      "sup_gap_dec": 0.00048828125,
+      "origin_intercept_exact": "-13/4096",
+      "origin_intercept_dec": -0.003173828125
+    },
+    {
+      "n": 12,
+      "p_y_exact": "-1/4096",
+      "p_y_dec": -0.000244140625,
+      "sup_gap_dec": 0.000244140625,
+      "origin_intercept_exact": "-7/4096",
+      "origin_intercept_dec": -0.001708984375
+    }
+  ]
+}

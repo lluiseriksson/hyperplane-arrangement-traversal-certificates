@@ -1,0 +1,109 @@
+{
+  "schema": "ARRANGEMENT-TRAVERSAL-CERT-1.0",
+  "mode": "frame_strategy_slice_potential_cert",
+  "cert_id": "m3_frame_4d_objective_jump_step",
+  "dim": 4,
+  "eta_covector": [
+    "1",
+    "1",
+    "1",
+    "1"
+  ],
+  "phi_covector": [
+    "4",
+    "3",
+    "2",
+    "1"
+  ],
+  "source_rays": [
+    [
+      "-1",
+      "0",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "-1",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "0",
+      "-1",
+      "0"
+    ],
+    [
+      "0",
+      "0",
+      "0",
+      "-1"
+    ]
+  ],
+  "target_rays": [
+    [
+      "-2",
+      "1",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "-2",
+      "1",
+      "0"
+    ],
+    [
+      "0",
+      "0",
+      "-2",
+      "1"
+    ],
+    [
+      "0",
+      "0",
+      "0",
+      "-1"
+    ]
+  ],
+  "source_lambda": "2",
+  "target_lambda": "7/2",
+  "source_opt_dim": 0,
+  "target_opt_dim": 0,
+  "claimed_source_slice_vertices": [
+    [
+      "-1",
+      "0",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "-1",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "0",
+      "-1",
+      "0"
+    ],
+    [
+      "0",
+      "0",
+      "0",
+      "-1"
+    ]
+  ],
+  "claimed_source_max_phi": "-1",
+  "claimed_source_argmax_idx": 3,
+  "claimed_next_eta_values": [
+    "-3",
+    "-2",
+    "-1"
+  ],
+  "claimed_target_max_phi": "-1",
+  "claimed_potential_strict_increase": true
+}

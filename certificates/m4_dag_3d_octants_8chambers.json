@@ -1,0 +1,262 @@
+{
+  "schema": "ARRANGEMENT-TRAVERSAL-CERT-1.0",
+  "mode": "acyclic_chamber_dag_escape_cert",
+  "cert_id": "m4_dag_3d_octants_8chambers",
+  "dim": 3,
+  "objective_c": [
+    "1",
+    "2",
+    "3"
+  ],
+  "hyperplanes": [
+    {
+      "normal": [
+        "1",
+        "0",
+        "0"
+      ],
+      "offset": "0"
+    },
+    {
+      "normal": [
+        "0",
+        "1",
+        "0"
+      ],
+      "offset": "0"
+    },
+    {
+      "normal": [
+        "0",
+        "0",
+        "1"
+      ],
+      "offset": "0"
+    }
+  ],
+  "chambers": [
+    {
+      "id": "oct_mmm",
+      "interior_point": [
+        "-1",
+        "-1",
+        "-1"
+      ],
+      "is_bounded": true,
+      "optimal_point": [
+        "0",
+        "0",
+        "0"
+      ],
+      "dual_multipliers": [
+        "1",
+        "2",
+        "3"
+      ],
+      "flag_layers": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "optimal_value": "0",
+      "potential": [
+        "0",
+        "0",
+        "0"
+      ],
+      "outgoing_targets": [
+        "oct_mmp",
+        "oct_mpm",
+        "oct_mpp",
+        "oct_pmm",
+        "oct_pmp",
+        "oct_ppm",
+        "oct_ppp"
+      ]
+    },
+    {
+      "id": "oct_mmp",
+      "interior_point": [
+        "-1",
+        "-1",
+        "1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "0",
+        "0",
+        "1"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    },
+    {
+      "id": "oct_mpm",
+      "interior_point": [
+        "-1",
+        "1",
+        "-1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "0",
+        "1",
+        "0"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    },
+    {
+      "id": "oct_mpp",
+      "interior_point": [
+        "-1",
+        "1",
+        "1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "0",
+        "1",
+        "1"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    },
+    {
+      "id": "oct_pmm",
+      "interior_point": [
+        "1",
+        "-1",
+        "-1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "1",
+        "0",
+        "0"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    },
+    {
+      "id": "oct_pmp",
+      "interior_point": [
+        "1",
+        "-1",
+        "1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "1",
+        "0",
+        "1"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    },
+    {
+      "id": "oct_ppm",
+      "interior_point": [
+        "1",
+        "1",
+        "-1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "1",
+        "1",
+        "0"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    },
+    {
+      "id": "oct_ppp",
+      "interior_point": [
+        "1",
+        "1",
+        "1"
+      ],
+      "is_bounded": false,
+      "optimal_point": [
+        "1",
+        "1",
+        "1"
+      ],
+      "dual_multipliers": [
+        "0",
+        "0",
+        "0"
+      ],
+      "flag_layers": [],
+      "optimal_value": "INF",
+      "potential": [
+        "INF"
+      ],
+      "outgoing_targets": []
+    }
+  ],
+  "claimed_is_acyclic": true,
+  "claimed_max_same_level_walk": 0,
+  "claimed_uniform_escape_L": 1
+}

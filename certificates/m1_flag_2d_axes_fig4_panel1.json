@@ -1,0 +1,78 @@
+{
+  "schema": "ARRANGEMENT-TRAVERSAL-CERT-1.0",
+  "mode": "flag_sign_targets_theorem2_cert",
+  "cert_id": "m1_flag_2d_axes_fig4_panel1",
+  "dim": 2,
+  "codim_r": 2,
+  "hyperplanes": [
+    {
+      "normal": [
+        "1",
+        "0"
+      ],
+      "offset": "0"
+    },
+    {
+      "normal": [
+        "0",
+        "1"
+      ],
+      "offset": "0"
+    },
+    {
+      "normal": [
+        "1",
+        "1"
+      ],
+      "offset": "0"
+    }
+  ],
+  "flag_witness_points": [
+    [
+      "-2",
+      "-1"
+    ],
+    [
+      "-1",
+      "0"
+    ],
+    [
+      "0",
+      "0"
+    ]
+  ],
+  "layer_hyperplanes": [
+    [
+      1
+    ],
+    [
+      0,
+      2
+    ]
+  ],
+  "target_witness_points": {
+    "+1,-1": [
+      "2",
+      "-1"
+    ],
+    "-1,+1": [
+      "-2",
+      "1"
+    ],
+    "-1,-1": [
+      "2",
+      "1"
+    ]
+  },
+  "claimed_source_signs": [
+    -1,
+    -1,
+    -1
+  ],
+  "claimed_base_signs": [
+    0,
+    0,
+    0
+  ],
+  "claimed_target_count": 3
+}

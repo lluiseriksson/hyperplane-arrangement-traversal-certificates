@@ -1,0 +1,36 @@
+{
+  "rows": [
+    {
+      "cert_id": "m3_frame_2d_same_face_lex_step",
+      "dim": 2,
+      "source_max_phi": -0.5,
+      "target_max_phi": 1.0,
+      "min_neg_next_eta": -2.5,
+      "max_neg_next_eta": -2.5
+    },
+    {
+      "cert_id": "m3_frame_3d_simplex_slice_step",
+      "dim": 3,
+      "source_max_phi": 0.0,
+      "target_max_phi": 1.0,
+      "min_neg_next_eta": -2.0,
+      "max_neg_next_eta": -1.0
+    },
+    {
+      "cert_id": "m3_frame_3d_dim_jump_step",
+      "dim": 3,
+      "source_max_phi": 2.0,
+      "target_max_phi": 1.0,
+      "min_neg_next_eta": -2.5,
+      "max_neg_next_eta": -2.0
+    },
+    {
+      "cert_id": "m3_frame_4d_objective_jump_step",
+      "dim": 4,
+      "source_max_phi": -1.0,
+      "target_max_phi": -1.0,
+      "min_neg_next_eta": -3.0,
+      "max_neg_next_eta": -1.0
+    }
+  ]
+}

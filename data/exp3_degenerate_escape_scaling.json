@@ -1,0 +1,52 @@
+{
+  "rows": [
+    {
+      "width_k": 1,
+      "bounded_chambers": 2,
+      "max_same_level_walk": 0,
+      "uniform_escape_L": 1
+    },
+    {
+      "width_k": 2,
+      "bounded_chambers": 4,
+      "max_same_level_walk": 1,
+      "uniform_escape_L": 2
+    },
+    {
+      "width_k": 3,
+      "bounded_chambers": 6,
+      "max_same_level_walk": 2,
+      "uniform_escape_L": 3
+    },
+    {
+      "width_k": 4,
+      "bounded_chambers": 8,
+      "max_same_level_walk": 3,
+      "uniform_escape_L": 4
+    },
+    {
+      "width_k": 5,
+      "bounded_chambers": 10,
+      "max_same_level_walk": 4,
+      "uniform_escape_L": 5
+    },
+    {
+      "width_k": 6,
+      "bounded_chambers": 12,
+      "max_same_level_walk": 5,
+      "uniform_escape_L": 6
+    },
+    {
+      "width_k": 7,
+      "bounded_chambers": 14,
+      "max_same_level_walk": 6,
+      "uniform_escape_L": 7
+    },
+    {
+      "width_k": 8,
+      "bounded_chambers": 16,
+      "max_same_level_walk": 7,
+      "uniform_escape_L": 8
+    }
+  ]
+}
