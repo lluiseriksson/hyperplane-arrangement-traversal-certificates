@@ -82,6 +82,11 @@ def make_fig2() -> None:
     ax1.axvline(0.0, color="#404040", lw=1.4)
     ax1.plot(ts, ts, color="#404040", lw=1.3)
     ax1.plot(ts, -ts, color="#404040", lw=1.3)
+    # Explicitly label all four defining lines so the geometry is unambiguous
+    ax1.text(2.12, 0.08, r"$H_0: x_2{=}0$", ha="right", va="bottom", fontsize=6.0, color="#333333")
+    ax1.text(0.06, 1.96, r"$H_1: x_1{=}0$", ha="left", va="top", fontsize=6.0, color="#333333")
+    ax1.text(1.98, 1.72, r"$H_2: x_1{-}x_2{=}0$", ha="right", va="top", fontsize=5.8, color="#333333", rotation=40)
+    ax1.text(-1.98, 1.72, r"$H_3: x_1{+}x_2{=}0$", ha="left", va="top", fontsize=5.8, color="#333333", rotation=-40)
     pts = {
         "c_LL": (-1.55, -0.62, r"$c_{\mathrm{LL}}$ ($\dim 1$)"),
         "c_LM": (-0.65, -1.48, r"$c_{\mathrm{LM}}$ ($\dim 0$)"),

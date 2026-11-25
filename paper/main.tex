@@ -1,8 +1,13 @@
-\documentclass[11pt,twocolumn]{article}
-\usepackage[margin=0.72in]{geometry}
+\documentclass[10pt,twocolumn]{article}
+\usepackage[margin=0.64in,columnsep=0.22in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{xurl}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{enumitem}
@@ -20,149 +25,166 @@
 \newcommand{\QQ}{\mathbb{Q}}
 \newcommand{\RR}{\mathbb{R}}
 
-\title{\textbf{Machine-Checked Exact-Rational Sign-Vector Flags, Quasipolyhedral Non-Attainment, Frame Slices, and Acyclic Chamber DAG Certificates for Hyperplane Arrangements}}
-\author{Lluis Eriksson\thanks{Independent researcher; manuscript prepared with transparent AI assistance via Google Antigravity. Source code, Lean~4 proofs, and exact certificates: \url{https://github.com/lluiseriksson/hyperplane-arrangement-traversal-certificates}.}}
+\title{\vspace{-0.8em}\textbf{Machine-Checked Sign-Vector Kernel and Exact-Rational Certificates for Flag Targets, Quasipolyhedral Non-Attainment, Frame Slices, and Acyclic Chamber DAGs}}
+\author{Lluis Eriksson\thanks{Independent researcher; manuscript prepared with transparent AI assistance via Google Antigravity. Source code (MIT), Lean~4 proofs (MIT), and manuscript/figures (CC-BY-4.0): \url{https://github.com/lluiseriksson/hyperplane-arrangement-traversal-certificates}.}}
 \date{November 25, 2026}
 
 \begin{document}
 \maketitle
+\vspace{-1.1em}
 
 \begin{abstract}
-Brennan Dury (\texttt{arXiv:2611.32976}, November 24, 2026) constructed directed acyclic graphs on the chambers of locally finite affine hyperplane arrangements driven by a nonconstant affine objective $\omega$: at every bounded chamber $c$, a flag of faces based at its optimal face $F$ of codimension $r$ generates $2^r - 1$ outgoing target chambers via an exact sign-flip formula; both an inner-product (Euclidean) and a covector-frame (Frame) strategy induce acyclic chamber digraphs in which every sufficiently long walk escapes to a strictly larger optimal value, and every affine objective bounded above on a closed face attains its supremum on a closed face. We present a machine-checked, zero-floating-point formalization and exact-$\QQ$ certificate auditor for the combinatorial, geometric, and LP-duality core of this construction. First, an 18-theorem zero-dependency Lean~4 kernel (\texttt{HyperplaneTraversal.lean}, Lean~4.35.0; 0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}, 5 zero-axiom theorems) formalizes Proposition~1 sign-closure poset axioms, Theorem~2's $2^r - 1$ target fanout, identity at $1^r$, mutual distinctness, and base containment, Section~2 Figure~2's quasipolyhedral non-attainment counterexample ($\ell_n(x) = 2^{-(n+1)}(x-n-2)$ hitting $\{0\}\times[-1,0]$ for all $n \ge 0$), and the scalar algebraic projections of Lemma~4, Lemma~15, Lemma~17, Proposition~3, and Theorem~3. Second, \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0} audits four exact-$\QQ$ modes—including exact codimension ranks, full-rank tangent cones, strict-complementarity KKT witnesses certifying $x^* \in \operatorname{relint}(F(c))$, and exact Theorem~2 $2^r-1$ target closures—across 16 canonical certificates ($0.110$--$1.003\,\mathrm{ms}$) and rejects 66/66 live adversarial forgeries.
+Brennan Dury (\texttt{arXiv:2611.32976}, November 24, 2026) constructed objective-driven acyclic digraphs on chambers of locally finite affine hyperplane arrangements: from each objective-bounded chamber $c$, a codimension-$r$ flag at its optimal face $F$ yields $2^r - 1$ outgoing targets via a sign-flip rule, and both Euclidean and Frame strategies force escape to strictly higher optimal values in bounded steps. We deliver an explicitly scoped, zero-floating-point verification stack pairing two complementary layers. First, an 18-theorem zero-dependency Lean~4.35.0 kernel (\texttt{HyperplaneTraversal.lean}; 0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}; 5 zero-axiom, 1 \texttt{[propext]}, 12 \texttt{[propext, Quot.sound]}) proves single-coordinate sign-closure poset axioms, combinatorial sign-flip counting/distinctness/containment identities, cleared integer/inductive laws of Section~2 Figure~2's quasipolyhedral non-attainment counterexample ($\ell_n(x)=2^{-(n+1)}(x-n-2)$), and scalar algebraic projections of Lemma~4, Lemma~15, Lemma~17, Proposition~3 (\texttt{lexLt3}), and Theorem~3. Second, \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0} performs full multi-dimensional exact-$\QQ$ verification of codimension ranks, Figure~2 truncations, full-rank Frame slices, and strict-complementarity KKT chamber DAGs across 16 canonical certificates ($0.110$--$1.003\,\mathrm{ms}$)—including a fully specified 8-chamber 4-line central fan DAG ($L=3$)—while rejecting 66/66 live adversarial forgeries.
 \end{abstract}
 
-\section{Introduction}
-Classical chamber-traversal constructions on real hyperplane arrangements—such as Edelman's walk~\cite{edelman1984partial} and Salvetti--Settepanella polar paths~\cite{salvetti2007combinatorial}—navigate toward a fixed base chamber. Brennan Dury~\cite{dury2026traversing} introduced objective-driven acyclic chamber digraphs on arbitrary locally finite affine hyperplane arrangements $\mathcal{P}$ with a nonconstant affine objective $\omega$, grounded in four exact algebraic and combinatorial pillars:
-\begin{enumerate}[leftmargin=*,nosep]
-  \item \emph{Sign-vector face calculus \& Theorem~2 target chambers:} Faces correspond to nonempty fibres of $x \mapsto \operatorname{sign}_{\mathcal{P}}(x) \in \{-1,0,+1\}^{\mathcal{P}}$ with closure order $E \subseteq \overline{F} \iff \forall q,\; \operatorname{sign}_E(q) \in \{0, \operatorname{sign}_F(q)\}$ (Proposition~1). A codimension-$r$ flag $F = F_r \subsetneq \dots \subsetneq F_0 = c$ partitions the defining forms $Q(F,\mathcal{P}) = Q_r \sqcup \dots \sqcup Q_1$ (with layer index $g_i(q)$), generating $2^r - 1$ distinct outgoing target chambers $b_{\mathrm{FL}}(\alpha)$ ($\alpha \in \{\pm 1\}^r \setminus \{1^r\}$)~\cite{aguiar2017topics} via
+\section{Introduction and Scope Calibration}
+Classical chamber-traversal constructions on real hyperplane arrangements—such as Edelman's walk~\cite{edelman1984partial} and Salvetti--Settepanella polar paths~\cite{salvetti2007combinatorial}—navigate toward a fixed base chamber. Brennan Dury~\cite{dury2026traversing} introduced objective-driven acyclic chamber digraphs on locally finite affine hyperplane arrangements $\mathcal{P}$ with a nonconstant affine objective $\omega$, built on four algebraic and geometric mechanisms:
+\begin{enumerate}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
+  \item \emph{Sign-vector face calculus \& Theorem~2 targets:} Faces are nonempty relatively open fibres of $x \mapsto \operatorname{sign}_{\mathcal{P}}(x) \in \{-1,0,+1\}^{\mathcal{P}}$, ordered by closure containment $E \subseteq \overline{F} \iff \forall q,\; \operatorname{sign}_E(q) \in \{0, \operatorname{sign}_F(q)\}$ (Proposition~1). A codimension-$r$ flag of faces $F = F_r, F_{r-1}, \dots, F_0 = c$ with $F_i \subseteq \overline{F_{i-1}}$ and $\operatorname{codim}(F_i) = i$ partitions the vanishing forms $Q(F,\mathcal{P}) = Q_1 \sqcup \dots \sqcup Q_r$ into nonempty layers $Q_i := Q(F_i,\mathcal{P})\setminus Q(F_{i-1},\mathcal{P})$; writing $\ell(q) \in \{1,\dots,r\}$ for the unique layer index with $q \in Q_{\ell(q)}$, every $\alpha \in \{\pm 1\}^r \setminus \{1^r\}$ defines one of $2^r - 1$ distinct outgoing target chambers $b_{\mathrm{FL}}(\alpha)$~\cite{aguiar2017topics} via
   \begin{equation}
     \operatorname{sign}_{b_{\mathrm{FL}}(\alpha)}(q) =
     \begin{cases}
-      \alpha_{g_i(q)}\,\operatorname{sign}_c(q), & q \in Q(F,\mathcal{P}),\\
+      \alpha_{\ell(q)}\,\operatorname{sign}_c(q), & q \in Q(F,\mathcal{P}),\\
       \operatorname{sign}_c(q), & q \notin Q(F,\mathcal{P}).
     \end{cases}
     \label{eq:thm2}
   \end{equation}
-  \item \emph{Attainment vs.\ Figure~2 quasipolyhedral non-attainment (Section~2):} While every bounded-above affine objective on a closed face of a locally finite arrangement attains its supremum (Theorem~1), the quasipolyhedral region $C = \{(x,y) : y \le \ell_n(x)\;\forall n \ge 0\}$ with $\ell_n(x) = 2^{-(n+1)}(x-n-2)$ satisfies $y < 0$ everywhere on $C$ yet $\omega(p_n) = -2^{-n} \to 0$; its arrangement violates local finiteness because every $H_n$ hits $\{0\} \times [-1,0]$ at $y_n = -(n+2)2^{-(n+1)}$.
-  \item \emph{Frame strategy slice recursion \& strict potential (Section~6, Lemma~17, Proposition~3):} Normalizing cone generators onto the affine slice $P_\eta(c,G) = R_G(c) \cap \{\eta = -1\}$ via $v_H = -\xi_H/\eta(\xi_H)$ and uniquely maximizing an admissible frame covector $\varphi$ yields strictly negative next covector values $\eta^+(q-p) = \varphi(q)-\varphi(p) < 0$, forcing the lexicographic potential $P^*_{\mathcal{F}}(c) = (\lambda(c,\omega), \dim F(c,\omega), S^{\mathcal{F}}_r(c),\dots, S^{\mathcal{F}}_2(c))$ to increase strictly along every edge.
-  \item \emph{Acyclicity \& uniform escape length $L$ (Theorem~3 \& Theorem~5):} Because $G_{\mathcal{F}}$ is acyclic and every chamber star is finite, every directed walk of length $L = L_{\max} + 1$ escapes strictly above its starting objective level $\lambda(c_0, \omega)$.
+  \item \emph{Figure~2 quasipolyhedral non-attainment (Section~2):} While every bounded-above affine objective on a closed face of a locally finite arrangement attains its supremum (Theorem~1), $C = \{(x,y) : y \le \ell_n(x)\;\forall n \ge 0\}$ with $\ell_n(x) = 2^{-(n+1)}(x-n-2)$ has $y < 0$ everywhere yet $\omega(p_n) = -2^{-n} \to 0$; every line $H_n$ hits $\{0\} \times [-1,0]$ at $y_n = -(n+2)2^{-(n+1)}$, violating local finiteness.
+  \item \emph{Frame slice recursion \& strict potential (Section~6, Lemma~17, Proposition~3):} Normalizing tangent-cone generators onto $P_\eta(c,G) = R_G(c) \cap \{\eta = -1\}$ via $v_H = -\xi_H/\eta(\xi_H)$ and uniquely maximizing an admissible frame covector $\varphi$ yields strictly negative next covector values $\eta^+(q-p) = \varphi(q)-\varphi(p) < 0$, strictly increasing the $(r+1)$-component lexicographic potential $P^*_{\mathcal{F}}(c) = (\lambda(c,\omega), \dim F(c,\omega), S^{\mathcal{F}}_r(c),\dots, S^{\mathcal{F}}_2(c))$.
+  \item \emph{Acyclicity \& uniform escape length $L$ (Theorem~3 \& Theorem~5):} Because $G_{\mathcal{F}}$ is acyclic on finite level sets, every directed walk of length $L = L_{\max} + 1$ escapes strictly above its starting optimal value $\lambda(c_0, \omega)$.
 \end{enumerate}
 
-\paragraph{Contributions and Scope.}
-We mechanize and audit the deterministic sign-vector, Figure~2 counterexample, Frame-strategy rational slice, strict-complementarity chamber-LP, and DAG escape core of~\cite{dury2026traversing}. We explicitly scope our Lean~4 kernel away from infinite topological compactness (Theorem~1), Zariski-open generic covector existence (Lemma~18), and full vector-space polyhedral induction—treating Theorems~8, 13, and 15--18 as cleared scalar algebraic projections of Dury's lemmas:
-\begin{enumerate}[leftmargin=*,nosep]
-  \item \textbf{Zero-dependency Lean~4 kernel (\S\ref{sec:lean}):} 18 constructive theorems in \texttt{HyperplaneTraversal.lean} (Lean~4.35.0~\cite{demoura2021lean4}), 0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}, and 5 zero-axiom theorems.
-  \item \textbf{Pure-stdlib exact-\texorpdfstring{$\QQ$}{Q} verifier (\S\ref{sec:certifier}):} The verifier \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0} audits Theorem~2 flags with exact codimension ranks, Figure~2 truncations, full-rank Frame slices, and complete chamber DAGs with strict-complementarity KKT optimality and exact $2^r-1$ targets.
-  \item \textbf{Empirical atlas \& red-team audit (\S\ref{sec:results}):} 16 canonical certificates ($0.110$--$1.003\,\mathrm{ms}$), target-fanout and Figure~2 gap curves, a certified 8-chamber 4-line central fan DAG ($L=3$), and 66/66 rejected live adversarial forgeries.
+\paragraph{Honest Two-Layer Scope Calibration.}
+We distinguish strictly between what is proved universally in Lean~4 vs.\ verified in full dimension on finite rational witnesses vs.\ left in~\cite{dury2026traversing}:
+\begin{enumerate}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
+  \item \textbf{Lean~4 kernel (\S\ref{sec:lean}, Table~\ref{tab:lean}):} 18 zero-dependency constructive theorems in \texttt{HyperplaneTraversal.lean} (Lean~4.35.0~\cite{demoura2021lean4}; 0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}). Table~\ref{tab:lean} prints every exact theorem type, hypothesis, and axiom footprint verbatim.
+  \item \textbf{Exact-$\QQ$ multi-dimensional verifier (\S\ref{sec:certifier}, Table~\ref{tab:atlas}):} \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0} performs full vector-space Gaussian rank checks, exact Figure~2 feasibility, full-rank Frame slices, and strict-complementarity KKT chamber DAG certification with zero floats.
+  \item \textbf{Explicit non-claims:} Our Lean~4 kernel does \emph{not} formalize general vector-space hyperplane arrangements, polyhedral faces, LP duality, multi-dimensional chamber DAGs, Theorem~1 compactness, or Lemma~18 Zariski-open admissibility; Theorems~1--8 and~13--18 formalize their exact single-coordinate sign calculus, counting identities, and cleared scalar/3-tuple algebraic projections, while multi-dimensional geometry is audited by \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0}.
 \end{enumerate}
 
 \section{Zero-Dependency Lean 4 Kernel}\label{sec:lean}
-We formalize 18 constructive theorems in \texttt{HyperplaneTraversal.lean} (Lean~4.35.0, zero external dependencies), audited by \texttt{AuditAxioms.lean} with 0~warnings, 0~\texttt{sorry}, 0~\texttt{Classical.choice}, and 0~\texttt{Lean.ofReduceBool} (Table~\ref{tab:lean}): 5 zero-axiom (\texttt{none}), 1 \texttt{[propext]}, and 12 \texttt{[propext, Quot.sound]}.
+\texttt{lean/HyperplaneTraversal.lean} compiles standalone under Lean~4.35.0 with zero external dependencies and is audited by \texttt{AuditAxioms.lean} with 0~warnings, 0~\texttt{sorry}, 0~\texttt{Classical.choice}, and 0~\texttt{Lean.ofReduceBool}: 5 zero-axiom (\texttt{none}: \#1--3, \#5, \#7), 1 \texttt{[propext]} (\#6), and 12 \texttt{[propext, Quot.sound]}.
 
-\begin{proposition}[Constructive Hyperplane-Traversal Kernel]\label{prop:lean}
-\leavevmode
-\begin{enumerate}[leftmargin=*,nosep]
-  \item \emph{Face calculus \& Theorem~2 targets (Theorems~1--8):} Reflexivity, transitivity, and antisymmetry of \texttt{signLe} on \texttt{Sign} $\in \{-1,0,+1\}$; $1 + (2^r - 1) = 2^r$ and $1 \le 2^r - 1$ for $r \ge 1$; identity \texttt{flipSign true s = s}; strict distinctness \texttt{flipSign a s $\neq$ flipSign b s} for $s \neq 0, a \neq b$; base containment \texttt{signLe 0 (flipSign $\alpha$ s)}; and scalar Lemma~4 monotonicity $\lambda_c = \omega(x^*) \le \lambda_b \Rightarrow \lambda_c \le \lambda_b$.
-  \item \emph{Section~2 Figure~2 counterexample (Theorems~9--12):} Exact cleared interpolation $(n - n - 2 = -2) \wedge ((n+1)-n-2 = -1)$; convex envelope identity $(x-(n+1)-2) - 2(x-n-2) = (n+1)-x$; inductive compact-segment bound $0 < n + 2 \le 2^{n+1}$ for all $n \in \mathbb{N}$; and strict negativity $x - n - 2 \le -3 < 0$ for $n \ge x + 1$.
-  \item \emph{Scalar projections of potentials \& escape (Theorems~13--18):} Opposite-ray contradiction $\eta(u) < 0 \wedge -\eta(u) < 0 \Rightarrow \bot$; transitivity and irreflexivity of 3-tuple lexicographic order \texttt{lexLt3}; Lemma~17 negativity $\varphi(q) < \varphi(p) \Rightarrow \varphi(q)-\varphi(p) < 0 < \varphi(p)-\varphi(q)$; slice normalization $\eta(\xi) = -D \Rightarrow \eta(\xi) = (-1)D < 0$; scalar rank-escape bound $\mathrm{rank}_0 + t < K \Rightarrow t < K$; and Lemma~15 Euclidean contradiction $\ell(u_c)<0 \wedge -\ell(u_c) \le \ell(u_b) \wedge \ell(u_b) < 0 \Rightarrow \bot$.
-\end{enumerate}
+\begin{table*}[t]
+\centering
+\caption{Complete inventory of all 18 Lean~4.35.0 theorems in \texttt{lean/HyperplaneTraversal.lean} with exact quantified statements, hypotheses, and audited axiom footprints (0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}; \texttt{P,Q} abbreviates \texttt{[propext, Quot.sound]}).}
+\label{tab:lean}
+\scriptsize
+\setlength{\tabcolsep}{2.8pt}
+\begin{tabular}{@{}r l p{10.5cm} l@{}}
+\toprule
+\# & Lean~4 Theorem Identifier & Exact Machine-Checked Statement \& Hypotheses & Axioms \\
+\midrule
+1 & \texttt{sign\_closure\_reflexive} & $\forall s\in\texttt{Sign},\ \texttt{signLe } s\ s$ (where $\texttt{signLe } a\ b :\!\iff a=0 \vee a=b$). & \texttt{none} \\
+2 & \texttt{sign\_closure\_transitive} & $\forall a,b,c\in\texttt{Sign},\ \texttt{signLe } a\ b \to \texttt{signLe } b\ c \to \texttt{signLe } a\ c$. & \texttt{none} \\
+3 & \texttt{sign\_closure\_antisymmetric} & $\forall a,b\in\texttt{Sign},\ \texttt{signLe } a\ b \to \texttt{signLe } b\ a \to a = b$. & \texttt{none} \\
+4 & \texttt{theorem2\_target\_count\_formula} & $\forall r\in\mathbb{N},\ 1\le r \to 1 + (2^r - 1) = 2^r \wedge 1 \le 2^r - 1$. & \texttt{P,Q} \\
+5 & \texttt{theorem2\_sign\_identity\_at\_ones} & $\forall s\in\texttt{Sign},\ \texttt{flipSign true } s = s$. & \texttt{none} \\
+6 & \texttt{theorem2\_distinct\_targets\_opposite\_sign} & $\forall a,b\in\texttt{Bool},\,s\in\texttt{Sign},\ s\ne 0 \to a\ne b \to \texttt{flipSign } a\ s \ne \texttt{flipSign } b\ s$. & \texttt{propext} \\
+7 & \texttt{theorem2\_base\_containment\_preserved} & $\forall \alpha\in\texttt{Bool},\,s\in\texttt{Sign},\ \texttt{signLe } 0\ (\texttt{flipSign } \alpha\ s)$. & \texttt{none} \\
+8 & \texttt{lemma4\_weak\_objective\_increase} & $\forall \lambda_c,\lambda_b,x^*\in\ZZ,\ \lambda_c = x^* \to x^* \le \lambda_b \to \lambda_c \le \lambda_b$ (scalar projection). & \texttt{P,Q} \\
+9 & \texttt{fig2\_line\_passes\_through\_pn\_and\_pn1} & $\forall n\in\ZZ,\ (n - n - 2 = -2) \wedge ((n+1) - n - 2 = -1)$ (cleared $\ell_n(p_n), \ell_n(p_{n+1})$). & \texttt{P,Q} \\
+10 & \texttt{fig2\_line\_envelope\_domination} & $\forall n,x\in\ZZ,\ (x-(n+1)-2) - 2(x-n-2) = (n+1)-x$ (cleared envelope step). & \texttt{P,Q} \\
+11 & \texttt{fig2\_origin\_intercept\_in\_compact\_unit\_segment} & $\forall n\in\mathbb{N},\ 0 < n + 2 \wedge n + 2 \le 2^{n+1}$ (inductive proof $y_0(H_n)\in[-1,0)$). & \texttt{P,Q} \\
+12 & \texttt{fig2\_strict\_negativity\_on\_C} & $\forall x,n\in\ZZ,\ x + 1 \le n \to x - n - 2 \le -3 \wedge x - n - 2 < 0$. & \texttt{P,Q} \\
+13 & \texttt{opposite\_ray\_negativity\_impossible} & $\forall u\in\ZZ,\ u < 0 \to -u < 0 \to \bot$ (scalar opposite-ray contradiction). & \texttt{P,Q} \\
+14 & \texttt{lex\_potential\_strict\_increase\_trans} & $\forall a,b,c\in\ZZ^3,\ \texttt{lexLt3 } a\ b \to \texttt{lexLt3 } b\ c \to \texttt{lexLt3 } a\ c \wedge \neg\texttt{lexLt3 } a\ a$. & \texttt{P,Q} \\
+15 & \texttt{lemma17\_slice\_denominator\_positive} & $\forall \varphi_p,\varphi_q\in\ZZ,\ \varphi_q < \varphi_p \to \varphi_q - \varphi_p < 0 \wedge 0 < \varphi_p - \varphi_q$. & \texttt{P,Q} \\
+16 & \texttt{slice\_vertex\_normalization\_identity} & $\forall \eta_\xi,D\in\ZZ,\ 0 < D \to \eta_\xi = -D \to \eta_\xi = (-1)\cdot D \wedge \eta_\xi < 0$. & \texttt{P,Q} \\
+17 & \texttt{dag\_escape\_length\_bound} & $\forall r_0,t,K\in\mathbb{N},\ r_0 + t < K \to t < K$ (scalar rank-escape bound). & \texttt{P,Q} \\
+18 & \texttt{euclidean\_inner\_product\_opposite\_unit\_neg} & $\forall u_c,u_b\in\ZZ,\ u_c < 0 \to -u_c \le u_b \to u_b < 0 \to \bot$ (scalar Lem.~15 projection). & \texttt{P,Q} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{proposition}[Constructive Scope of \texttt{HyperplaneTraversal.lean}]\label{prop:lean}
+\normalfont All 18 statements in Table~\ref{tab:lean} hold constructively without external libraries or \texttt{Classical.choice}. In particular, Theorem~11 inductively proves $0 < n + 2 \le 2^{n+1}$ for all $n\in\mathbb{N}$ (showing every line $H_n$ of Figure~2 meets $\{0\}\times[-1,0]$), Theorem~14 proves strict partial-order acyclicity of \texttt{lexLt3}, Theorem~15 proves Lemma~17's negative next covector $\varphi_q - \varphi_p < 0 < \varphi_p - \varphi_q$, and Theorem~16 proves $\eta_\xi = (-1)D < 0$ under the explicit hypothesis $0 < D$.
 \end{proposition}
 
-\begin{table}[t]
-\centering
-\caption{Complete 18-theorem Lean~4.35.0 kernel in \texttt{HyperplaneTraversal.lean} (0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}).}
-\label{tab:lean}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{@{}rll@{}}
-\toprule
-\# & Lean~4 Theorem Identifier & Axiom Footprint \\
-\midrule
-1 & \texttt{sign\_closure\_reflexive} & \texttt{none} \\
-2 & \texttt{sign\_closure\_transitive} & \texttt{none} \\
-3 & \texttt{sign\_closure\_antisymmetric} & \texttt{none} \\
-4 & \texttt{theorem2\_target\_count\_formula} & \texttt{[propext, Quot.sound]} \\
-5 & \texttt{theorem2\_sign\_identity\_at\_ones} & \texttt{none} \\
-6 & \texttt{theorem2\_distinct\_targets\_opposite\_sign} & \texttt{[propext]} \\
-7 & \texttt{theorem2\_base\_containment\_preserved} & \texttt{none} \\
-8 & \texttt{lemma4\_weak\_objective\_increase} & \texttt{[propext, Quot.sound]} \\
-9 & \texttt{fig2\_line\_passes\_through\_pn\_and\_pn1} & \texttt{[propext, Quot.sound]} \\
-10 & \texttt{fig2\_line\_envelope\_domination} & \texttt{[propext, Quot.sound]} \\
-11 & \texttt{fig2\_origin\_intercept\_in\_compact\_unit\_segment} & \texttt{[propext, Quot.sound]} \\
-12 & \texttt{fig2\_strict\_negativity\_on\_C} & \texttt{[propext, Quot.sound]} \\
-13 & \texttt{opposite\_ray\_negativity\_impossible} & \texttt{[propext, Quot.sound]} \\
-14 & \texttt{lex\_potential\_strict\_increase\_trans} & \texttt{[propext, Quot.sound]} \\
-15 & \texttt{lemma17\_slice\_denominator\_positive} & \texttt{[propext, Quot.sound]} \\
-16 & \texttt{slice\_vertex\_normalization\_identity} & \texttt{[propext, Quot.sound]} \\
-17 & \texttt{dag\_escape\_length\_bound} & \texttt{[propext, Quot.sound]} \\
-18 & \texttt{euclidean\_inner\_product\_opposite\_unit\_neg} & \texttt{[propext, Quot.sound]} \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
 \section{Exact-\texorpdfstring{$\QQ$}{Q} Verifier Architecture}\label{sec:certifier}
-The pure-stdlib zero-float verifier \texttt{arrangement\_certifier.py} (\texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0}) enforces strict JSON typing, canonical reduced rationals, and uniform 2048-bit / 1024-char / 128-char ID bounds across four modes:
-\begin{enumerate}[leftmargin=*,nosep]
-  \item \textbf{Mode~1 (Theorem~2 Flag Sign Targets):} Evaluates interior witness points along $F_0 = c \supset \dots \supset F_r = F$, verifies exact Gaussian codimension rank $\operatorname{rank}(H(F_i)) = i$ at every level and exact layer partition $H_1 \sqcup \dots \sqcup H_r$, and certifies that all $2^r - 1$ target witnesses realize~\eqref{eq:thm2}, are pairwise distinct, and contain $F$ in their closures.
+The pure-stdlib zero-float verifier \texttt{src/arrangement\_certifier.py} (\texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0}) enforces strict JSON typing, canonical reduced rationals, and uniform 2048-bit / 1024-char / 128-char ID bounds across four modes:
+\begin{enumerate}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
+  \item \textbf{Mode~1 (Theorem~2 Flag Sign Targets):} Evaluates interior witness points along $F_0 = c, F_1, \dots, F_r = F$ with $F_i \subseteq \overline{F_{i-1}}$, verifies exact Gaussian codimension rank $\operatorname{rank}(Q(F_i,\mathcal{P})) = i$ at every level and exact layer partition $Q_1 \sqcup \dots \sqcup Q_r$, and certifies that all $2^r - 1$ target witnesses realize~\eqref{eq:thm2}, are pairwise distinct, and contain $F$ in their closures.
   \item \textbf{Mode~2 (Section~2 Figure~2 Counterexample):} Independently verifies exact interpolation $p_k = (k, -2^{-k}) \in H_k \cap H_{k-1}$, all $(N+1)^2$ halfplane inequalities $y(p_k) \le \ell_n(x(p_k))$, compact-segment intercepts $y_0(H_n) = -(n+2)2^{-(n+1)} \in [-1,0)$, and exact gap $0 - \omega(p_N) = 2^{-N}$.
   \item \textbf{Mode~3 (Section~6 Frame Slice \& Potential):} Enforces full-rank tangent cones ($\operatorname{rank} = d$), pairwise distinct slice vertices $v_k = -\xi_k/\eta(\xi_k) \in \{\eta = -1\}$ with distinct source/target slices, valid face dimensions $0 \le \dim F < d$, unique admissibility of $\arg\max \varphi(v_k)$, Lemma~17 next-covector negativity $\eta^+(q-p) = \varphi(q)-\varphi(p) < 0$ on $\ker\eta$, and strict increase $P^*(c) <_{\mathrm{lex}} P^*(b)$.
-  \item \textbf{Mode~4 (Acyclic Chamber DAG \& Escape $L$):} Enforces strict-complementarity KKT optimality ($y_k > 0 \iff q_k(x^*) = 0$, $c_{\omega} + \sum_k y_k \sigma_k a_k = 0$) certifying $x^* \in \operatorname{relint}(F(c))$ and $\dim F(c) = d - \operatorname{rank}(H(F(c)))$ on every bounded chamber, positive recession rays and canonical zero/empty fields on unbounded chambers, exact match between each bounded chamber's outgoing edges and all $2^r - 1$ Theorem~2 targets of its flag layers, true $F(c) \subseteq \overline{b}$, strict 3-tuple potential increase, Kahn DAG acyclicity, and exact uniform escape length $L = L_{\max} + 1$.
+  \item \textbf{Mode~4 (Acyclic Chamber DAG \& Escape $L$):} On every objective-bounded chamber $c$, enforces nonnegativity $y_k \ge 0$, strict complementarity ($y_k > 0 \iff q_k(x^*) = 0$, $y_k = 0 \iff q_k(x^*) \neq 0$), and LP dual stationarity $c_{\omega} + \sum_k y_k \sigma_k a_k = 0$ certifying $x^* \in \operatorname{relint}(F(c))$ and $\dim F(c) = d - \operatorname{rank}(Q(F(c),\mathcal{P}))$; on every objective-unbounded chamber, verifies a positive recession ray and canonical zero/empty fields. It then checks that every objective-bounded chamber's outgoing edges match all $2^r - 1$ Theorem~2 targets of its flag layers with $F(c) \subseteq \overline{b}$, checks strict increase of the certified 3-tuple potential proxy $(\lambda, \dim F, S)$ (exact for $r\le 2$, and sufficient on our $r=3$ octant where all targets jump to $\lambda=\infty$; Dury's general $P^*_{\mathcal{F}}$ has $r+1$ components for $r\ge 3$), certifies Kahn DAG acyclicity, and computes $L = L_{\max} + 1$.
 \end{enumerate}
 
-\section{Empirical Atlas and Red-Team Audit}\label{sec:results}
-Running \texttt{run\_all\_experiments.py} produces 16 canonical certificates (4 per mode) and four exact-$\QQ$ studies, audited end-to-end by \texttt{verify\_all.py} with SHA-256 verification across all 41 tracked artifacts.
+\section{Empirical Atlas, Explicit 4-Line Fan, and Red-Team Audit}\label{sec:results}
+Running \texttt{scripts/run\_all\_experiments.py} produces all 16 canonical certificates (Table~\ref{tab:atlas}) and four exact-$\QQ$ datasets, audited end-to-end by \texttt{scripts/verify\_all.py} with SHA-256 verification across all 41 tracked files.
+
+\begin{table*}[t]
+\centering
+\caption{Complete 16-certificate \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0} atlas with explicit dimensions, parameters, exact certified witness invariants, and median zero-float replay latencies (all 16 verified; 66/66 live adversarial attacks rejected).}
+\label{tab:atlas}
+\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{@{}r l c p{10.5cm} r@{}}
+\toprule
+\# & Certificate ID & Mode & Explicit Certified Parameters & ms \\
+\midrule
+1 & \texttt{m1\_flag\_2d\_axes\_fig4\_panel1} & M1 & $d{=}2, r{=}2$ (Dury Fig.~4a: $x_1, x_2, x_1{+}x_2{=}0$): layers $[[1],[0,2]]$, $3$ distinct targets. & 0.147 \\
+2 & \texttt{m1\_flag\_2d\_axes\_fig4\_panel2} & M1 & $d{=}2, r{=}2$ (Dury Fig.~4b: $x_1, x_2, x_1{+}x_2{=}0$): layers $[[0],[1,2]]$, $3$ distinct targets. & 0.148 \\
+3 & \texttt{m1\_flag\_3d\_coupled\_codim3} & M1 & $d{=}3, r{=}3$ ($5$ coupled planes): layers $[[2],[1,4],[0,3]]$, exact ranks $0,1,2,3$, $7$ targets. & 0.344 \\
+4 & \texttt{m1\_flag\_4d\_affine\_codim4\_15targets} & M1 & $d{=}4, r{=}4$ ($7$ planes, 1 non-central): layers $[[3],[2,5],[1],[0,4]]$, $15$ distinct targets. & 1.003 \\
+\midrule
+5 & \texttt{m2\_fig2\_counterexample\_N4} & M2 & Sec.~2 Fig.~2 truncation $N{=}4$: $25$ halfplane checks, $y_0\in[-1,0)$, gap $=1/16$. & 0.137 \\
+6 & \texttt{m2\_fig2\_counterexample\_N8} & M2 & Sec.~2 Fig.~2 truncation $N{=}8$: $81$ halfplane checks, $y_0\in[-1,0)$, gap $=1/256$. & 0.256 \\
+7 & \texttt{m2\_fig2\_counterexample\_N12} & M2 & Sec.~2 Fig.~2 truncation $N{=}12$: $169$ halfplane checks, $y_0\in[-1,0)$, gap $=1/4096$. & 0.506 \\
+8 & \texttt{m2\_fig2\_counterexample\_N16} & M2 & Sec.~2 Fig.~2 truncation $N{=}16$: $289$ halfplane checks, $y_0\in[-1,0)$, gap $=1/65536$. & 0.860 \\
+\midrule
+9 & \texttt{m3\_frame\_2d\_same\_face\_lex\_step} & M3 & $d{=}2$, full-rank cones: $\lambda{=}0, \dim F{=}0$, $S^{\mathcal{F}}: -1/2 \to 1$, $\eta^+=-5/2 < 0$. & 0.110 \\
+10 & \texttt{m3\_frame\_3d\_simplex\_slice\_step} & M3 & $d{=}3$, simplicial cones: $\lambda{=}5, \dim F{=}0$, $S^{\mathcal{F}}: 0 \to 1$, $\eta^+\in\{-2,-1\}$. & 0.168 \\
+11 & \texttt{m3\_frame\_3d\_dim\_jump\_step} & M3 & $d{=}3$, full-rank cones: $\lambda{=}3$, $\dim F: 0 \to 1$, $\eta^+\in\{-5/2,-2\}$. & 0.186 \\
+12 & \texttt{m3\_frame\_4d\_objective\_jump\_step} & M3 & $d{=}4$, full-rank cones: $\lambda: 2 \to 7/2$, $\dim F{=}0$, $\eta^+\in\{-3,-2,-1\}$. & 0.265 \\
+\midrule
+13 & \texttt{m4\_dag\_2d\_cross\_4chambers} & M4 & $d{=}2$ cross ($x_1,x_2{=}0$), $\omega{=}x_1{+}2x_2$: $1$ obj-bounded, $3$ unbounded, $L_{\max}{=}0, L{=}1$. & 0.201 \\
+14 & \texttt{m4\_dag\_2d\_grid\_9chambers} & M4 & $d{=}2$ $2{\times}2$ grid, $\omega{=}x_1{+}2x_2$: $4$ obj-bounded, $5$ unbounded, $L_{\max}{=}0, L{=}1$. & 0.580 \\
+15 & \texttt{m4\_dag\_2d\_degenerate\_escape\_L3} & M4 & $d{=}2$ 4-line fan ($H_0..H_3$), $\omega{=}x_2$: $4$ obj-bounded, $4$ unbounded, $L_{\max}{=}2, L{=}3$. & 0.683 \\
+16 & \texttt{m4\_dag\_3d\_octants\_8chambers} & M4 & $d{=}3$ octants, $\omega{=}x_1{+}2x_2{+}3x_3$: $1$ obj-bounded ($7$ edges), $7$ unbounded, $L{=}1$. & 0.341 \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig1_fanout_and_fig2_counterexample.png}
+  \vspace{-1.2em}
   \caption{(a) Exact Theorem~2 outgoing target fanout $2^r - 1$ vs.\ total flag chambers $2^r$ across codimensions $r=1\dots 8$. (b) Section~2 Figure~2 exact supremum gap $-\omega(p_n)=2^{-n}$ and origin intercept $|y_0(H_n)| = (n+2)2^{-(n+1)} \le 1$ across $n=0\dots 12$.}
   \label{fig:fanout}
 \end{figure}
 
-\paragraph{Theorem~2 Target Fanout and Figure~2 Counterexample (Fig.~\ref{fig:fanout}).}
-Mode~1 ($0.147$--$1.003\,\mathrm{ms}$) certifies both panels of Dury's Figure~4 in $\mathbb{R}^2$ ($r=2$, $3$ targets each), a 3D coupled arrangement ($r=3$, $7$ targets), and a 4D affine arrangement with a non-central hyperplane ($r=4$, $15$ distinct target chambers), all verified with exact codimension ranks. Mode~2 ($0.137$--$0.860\,\mathrm{ms}$) verifies exact Figure~2 truncations at $N \in \{4, 8, 12, 16\}$ with supremum gap shrinking from $1/16$ to $1/65536$ while every origin intercept $y_0(H_n)$ stays strictly inside $[-1,0)$.
+\paragraph{Explicit Verification of the 8-Chamber 4-Line Central Fan DAG (Fig.~\ref{fig:dag}(a)).}
+Certificate~\#15 uses the four central lines $H_0: x_2 = 0$, $H_1: x_1 = 0$, $H_2: x_1 - x_2 = 0$, $H_3: x_1 + x_2 = 0$ and objective $\omega(x) = x_2$. In the lower half-plane ($x_2 < 0$), the four objective-bounded sectors are, from left to right:
+\begin{itemize}[leftmargin=1.1em,itemsep=1pt,topsep=1pt]
+  \item $c_{\mathrm{LL}}$ at $(-2,-1)$, signs $(-,-,-,-)$: adjacent to $H_0$, so $F=\{x_2=0, x_1\le 0\}$ ($\dim 1$), $x^*=(-1,0)$, $y=(1,0,0,0)$, layer $[[0]]$, unique target $c_{\mathrm{UL}}=(+,-,-,-)$ at $(-2,1)$.
+  \item $c_{\mathrm{LM}}$ at $(-1,-2)$, signs $(-,-,+,-)$: bounded above by $x_1\le 0$ and $x_2\le x_1$, so $F=\{(0,0)\}$ ($\dim 0$) with strict-complementarity KKT $y=(1/4,1/4,1/2,1/4)\ge 0$ satisfying $(0,1)+\sum y_k\sigma_k a_k = (0,0)$. Layers $[[1],[0,2,3]]$ flip $\{1\}\mapsto (-,+,+,-)=c_{\mathrm{RM}}$, $\{0,2,3\}\mapsto (+,-,-,+)=c_{\mathrm{UML}}$ at $(-1,2)$, and $\{0,1,2,3\}\mapsto (+,+,-,+)=c_{\mathrm{UMR}}$ at $(1,2)$.
+  \item $c_{\mathrm{RM}}$ at $(1,-2)$, signs $(-,+,+,-)$: bounded above by $x_1\ge 0$ and $x_2\le -x_1$, so $F=\{(0,0)\}$ ($\dim 0$) with $y=(1/4,1/4,1/4,1/2)\ge 0$. Layers $[[3],[0,1,2]]$ flip $\{3\}\mapsto (-,+,+,+)=c_{\mathrm{RR}}$, $\{0,1,2\}\mapsto (+,-,-,-)=c_{\mathrm{UL}}$, and $\{0,1,2,3\}\mapsto (+,-,-,+)=c_{\mathrm{UML}}$.
+  \item $c_{\mathrm{RR}}$ at $(2,-1)$, signs $(-,+,+,+)$: adjacent to $H_0$, so $F=\{x_2=0, x_1\ge 0\}$ ($\dim 1$), $x^*=(1,0)$, $y=(1,0,0,0)$, layer $[[0]]$, unique target $c_{\mathrm{UR}}=(+,+,+,+)$ at $(2,1)$.
+\end{itemize}
+Thus $c_{\mathrm{LM}}(\dim 0) \to c_{\mathrm{RM}}(\dim 0) \to c_{\mathrm{RR}}(\dim 1) \to c_{\mathrm{UR}}(\infty)$ is an exact certified walk with $L_{\max}=2$ and $L=3$, matching Eq.~\eqref{eq:thm2} on every single edge.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig2_chamber_dag_and_escape.png}
-  \caption{(a) Certified 8-chamber 4-line central fan DAG for $\omega(x)=x_2$ with strict complementarity and exact Theorem~2 targets: orange same-level path $c_{\mathrm{LM}} \to c_{\mathrm{RM}} \to c_{\mathrm{RR}}$ ($\lambda=0$) and blue escape edges ($\lambda\to\infty$), giving $L=3$. (b) Theorem~3 uniform escape length $L = L_{\max} + 1$ scaling across level-set widths $k = 1\dots 8$.}
+  \vspace{-1.2em}
+  \caption{(a) Certified 8-chamber 4-line central fan DAG ($H_0: x_2{=}0$, $H_1: x_1{=}0$, $H_2: x_1{-}x_2{=}0$, $H_3: x_1{+}x_2{=}0$) under $\omega(x)=x_2$: orange same-level path $c_{\mathrm{LM}} \to c_{\mathrm{RM}} \to c_{\mathrm{RR}}$ ($\lambda=0$) and blue escape edges ($\lambda\to\infty$), giving $L=3$. (b) Theorem~3 uniform escape length $L = L_{\max} + 1$ scaling across level-set widths $k = 1\dots 8$.}
   \label{fig:dag}
 \end{figure}
 
-\paragraph{Frame Strategy Slices and Acyclic Chamber DAG Escape (Fig.~\ref{fig:dag}).}
-Mode~3 ($0.110$--$0.265\,\mathrm{ms}$) audits full-rank Frame Strategy transitions across $d \in \{2, 3, 4\}$, covering all three Proposition~3 strict-increase branches (same-face $S^{\mathcal{F}}$ increase, equal-$\lambda$ dimension jump $0 \to 1$, and strict $\lambda$ increase $2 \to 7/2$). Mode~4 ($0.201$--$0.683\,\mathrm{ms}$) verifies strict-complementarity chamber DAGs across 2D crosses ($4$ chambers, $L=1$), 2D grids ($9$ chambers, $L=1$), the 8-chamber 4-line central fan under $\omega(x)=x_2$ attaining the genuine same-level walk $c_{\mathrm{LM}} (\dim 0) \to c_{\mathrm{RM}} (\dim 0) \to c_{\mathrm{RR}} (\dim 1) \to c_{\mathrm{UR}} (\infty)$ ($L_{\max}=2, L=3$), and 3D coordinate octants ($8$ chambers, $7$ outgoing edges from the bounded octant, $L=1$).
+\paragraph{Replay Atlas and 66/66 Red-Team Audit (Fig.~\ref{fig:atlas}).}
+All 16 canonical certificates replay in $0.110$--$1.003\,\mathrm{ms}$ with zero floats. Our red-team suite (\texttt{tests/test\_suite.py}) tests 66 live forgery attacks (12 global schema/type/rational + 13 Mode~1 + 12 Mode~2 + 14 Mode~3 + 15 Mode~4—including float/\texttt{None}/bool injection, unreduced fractions, codimension rank-jump bypasses, broken flag closures, missing Theorem~2 targets, forged Figure~2 vertices/intercepts, rank-deficient cones, negative $y_k$, boundary-$x^*$ strict-complementarity bypasses, forged $\dim F$, dropped DAG edges, and cycles), achieving \textbf{66/66 rejections} with zero bypasses.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig3_certificate_replay_atlas.png}
-  \caption{(a) Exact zero-float replay latency across all 16 canonical certificates ($0.110$--$1.003\,\mathrm{ms}$). (b) Red-team adversarial audit rejecting 66/66 live forgery attacks across five attack classes.}
+  \vspace{-1.2em}
+  \caption{(a) Exact zero-float replay latency across all 16 canonical certificates ($0.110$--$1.003\,\mathrm{ms}$). (b) Live adversarial red-team audit rejecting 66/66 forgeries across five attack classes.}
   \label{fig:atlas}
 \end{figure}
 
-\paragraph{Replay Atlas and Red-Team Audit (Fig.~\ref{fig:atlas}, Table~\ref{tab:replay}).}
-All 16 canonical certificates replay in $0.110$--$1.003\,\mathrm{ms}$ with zero floats. Our red-team suite (\texttt{tests/test\_suite.py}) tests 66 live forgery attacks—including float/\texttt{None}/bool injection, unreduced fractions, DoS caps, codimension rank-jump bypasses, broken flag closures, missing Theorem~2 targets, forged Figure~2 vertices/intercepts, rank-deficient cones, out-of-range face dimensions, inadmissible tied covectors, boundary-$x^*$ strict-complementarity bypasses, forged $\dim F$ potentials, dropped Theorem~2 DAG edges, unchecked unbounded-chamber payloads, and cycles—achieving \textbf{66/66 rejections} with zero bypasses.
-
-\begin{table}[t]
-\centering
-\caption{Summary of all 16 canonical certificates and 66/66 live adversarial red-team audit.}
-\label{tab:replay}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Verification Mode & Certs & Latency (ms) & Attacks Rejected \\
-\midrule
-Mode~1: Prop.~1 \& Thm.~2 Flags & 4 & $0.147$--$1.003$ & 13/13 \\
-Mode~2: Sec.~2 Fig.~2 Counterex. & 4 & $0.137$--$0.860$ & 12/12 \\
-Mode~3: Sec.~6 Frame Slice \& Pot. & 4 & $0.110$--$0.265$ & 14/14 \\
-Mode~4: Acyclic Chamber DAG & 4 & $0.201$--$0.683$ & 15/15 \\
-Global Schema / Type / Rational & -- & -- & 12/12 \\
-\midrule
-\textbf{Total} & \textbf{16} & \textbf{0.110--1.003} & \textbf{66/66} \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
 \section{Conclusion}
-We delivered an 18-theorem zero-dependency Lean~4 kernel (0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}, 5 zero-axiom theorems) and the hardened exact-$\QQ$ verifier \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0} for the sign-vector flag, quasipolyhedral non-attainment, Frame-slice potential, and strict-complementarity acyclic chamber-DAG core of Brennan Dury~\cite{dury2026traversing}. Mechanizing Theorem~1's locally-finite compactness argument and Lemma~18's Zariski-open admissibility proof in Lean~4 remain compelling targets for formalized discrete geometry.
+We delivered an explicitly scoped 18-theorem zero-dependency Lean~4.35.0 kernel (0~\texttt{sorry}, 0~warnings, 0~\texttt{Classical.choice}, 5 zero-axiom theorems) paired with the exact-$\QQ$ multi-dimensional verifier \texttt{ARRANGEMENT-TRAVERSAL-CERT-1.0}, 16 explicit canonical certificates ($0.110$--$1.003\,\mathrm{ms}$), full explicit verification of the 8-chamber 4-line central fan DAG ($L=3$), and 66/66 live adversarial forgery rejections.
 
 \bibliographystyle{plain}
 \bibliography{references}
